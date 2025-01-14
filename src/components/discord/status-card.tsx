@@ -1,50 +1,80 @@
-"use client";
+"use client"
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { signIn, useSession } from "next-auth/react";
-import { DiscordStatusDisplay } from "./status-display";
+import { useState } from "react"
+import { motion } from "framer-motion"
+import { Card, CardContent } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { signIn, useSession } from "next-auth/react"
+import { DiscordStatusDisplay } from "./status-display"
+import { DiscordLogo } from "./discord-logo"
 
 export function DiscordConnectionCard() {
-  const { data: session, status } = useSession();
+  const { data: session, status } = useSession()
+  const [isHovered, setIsHovered] = useState(false)
 
   return (
-    <Card>
-      <CardHeader>
-        <div className="flex items-center gap-3">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 127.14 96.36"
-            className="h-8 w-8 text-[#5865F2] fill-current"
+    <Card className="overflow-hidden">
+      <CardContent className="p-0">
+        <div className="bg-gradient-to-br from-[#5865F2] to-[#4752C4] p-6">
+          <motion.div
+            className="flex items-center justify-between"
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
           >
-            <path d="M107.7,8.07A105.15,105.15,0,0,0,81.47,0a72.06,72.06,0,0,0-3.36,6.83A97.68,97.68,0,0,0,49,6.83,72.37,72.37,0,0,0,45.64,0,105.89,105.89,0,0,0,19.39,8.09C2.79,32.65-1.71,56.6.54,80.21h0A105.73,105.73,0,0,0,32.71,96.36,77.7,77.7,0,0,0,39.6,85.25a68.42,68.42,0,0,1-10.85-5.18c.91-.66,1.8-1.34,2.66-2a75.57,75.57,0,0,0,64.32,0c.87.71,1.76,1.39,2.66,2a68.68,68.68,0,0,1-10.87,5.19,77,77,0,0,0,6.89,11.1A105.25,105.25,0,0,0,126.6,80.22h0C129.24,52.84,122.09,29.11,107.7,8.07ZM42.45,65.69C36.18,65.69,31,60,31,53s5-12.74,11.43-12.74S54,46,53.89,53,48.84,65.69,42.45,65.69Zm42.24,0C78.41,65.69,73.25,60,73.25,53s5-12.74,11.44-12.74S96.23,46,96.12,53,91.08,65.69,84.69,65.69Z" />
-          </svg>
-          <CardTitle>Discord Connection</CardTitle>
-        </div>
-      </CardHeader>
-      <CardContent>
-        {status === "loading" ? (
-          <div className="flex items-center justify-center h-32">
-            <div className="animate-pulse text-muted-foreground">
-              Loading...
+            <div className="flex items-center space-x-4">
+              <DiscordLogo className="h-10 w-10 text-white" />
+              <h2 className="text-2xl font-bold text-white">Discord Connection</h2>
             </div>
-          </div>
-        ) : session ? (
-          <DiscordStatusDisplay />
-        ) : (
-          <div className="flex flex-col items-center justify-center space-y-4 py-6">
-            <p className="text-muted-foreground text-center">
-              Connect your Discord account to get started
-            </p>
-            <Button
-              onClick={() => signIn("discord")}
-              className="bg-[#5865F2] hover:bg-[#4752C4] text-white"
+            {session && (
+              <div className="flex items-center space-x-2">
+                <div className="h-3 w-3 rounded-full bg-green-400" />
+                <span className="text-sm font-medium text-white">Connected</span>
+              </div>
+            )}
+          </motion.div>
+        </div>
+        <div className="p-6">
+          {status === "loading" ? (
+            <div className="flex items-center justify-center h-32">
+              <motion.div
+                className="h-8 w-8 border-4 border-[#5865F2] border-t-transparent rounded-full"
+                animate={{ rotate: 360 }}
+                transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+              />
+            </div>
+          ) : session ? (
+            <DiscordStatusDisplay />
+          ) : (
+            <motion.div
+              className="flex flex-col items-center justify-center space-y-6 py-8"
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.5 }}
             >
-              Connect Discord Account
-            </Button>
-          </div>
-        )}
+              <p className="text-center text-gray-600 dark:text-gray-400">
+                Connect your Discord account to get started
+              </p>
+              <Button
+                onClick={() => signIn("discord")}
+                onMouseEnter={() => setIsHovered(true)}
+                onMouseLeave={() => setIsHovered(false)}
+                className="bg-[#5865F2] hover:bg-[#4752C4] text-white transition-all duration-300 ease-in-out transform hover:scale-105"
+              >
+                <DiscordLogo className="h-5 w-5 mr-2" />
+                <span>Connect Discord Account</span>
+                <motion.div
+                  className="absolute inset-0 bg-white rounded-md"
+                  initial={{ scale: 0, opacity: 0 }}
+                  animate={{ scale: isHovered ? 1.1 : 0, opacity: isHovered ? 0.1 : 0 }}
+                  transition={{ duration: 0.3 }}
+                />
+              </Button>
+            </motion.div>
+          )}
+        </div>
       </CardContent>
     </Card>
-  );
+  )
 }
+

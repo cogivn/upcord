@@ -32,18 +32,58 @@ const getDiscordData = cache(async (accessToken: string): Promise<DiscordApiResp
   ]);
 
   if (!userResponse.ok || !guildsResponse.ok) {
-    throw new Error('Failed to fetch Discord data');
+    const userError = await userResponse.text().catch(() => 'Failed to get error text');
+    const guildsError = await guildsResponse.text().catch(() => 'Failed to get error text');
+    console.error('Discord API responses:', {
+      user: {
+        status: userResponse.status,
+        statusText: userResponse.statusText,
+        error: userError
+      },
+      guilds: {
+        status: guildsResponse.status,
+        statusText: guildsResponse.statusText,
+        error: guildsError
+      }
+    });
+    throw new Error(`Failed to fetch Discord data: User(${userResponse.status}), Guilds(${guildsResponse.status})`);
   }
 
   const userData: DiscordUser = await userResponse.json();
   const guildsData: DiscordGuild[] = await guildsResponse.json();
+
+  // Fetch roles for each guild where the user has the MANAGE_ROLES permission
+  const guildsWithRoles = await Promise.all(
+    guildsData.map(async (guild) => {
+      const permissions = BigInt(guild.permissions);
+      const hasManageRoles = (permissions & BigInt(0x10000000)) !== BigInt(0); // MANAGE_ROLES permission
+      
+      if (hasManageRoles) {
+        try {
+          const rolesResponse = await fetch(`${DISCORD_API_URL}/guilds/${guild.id}/roles`, {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+            },
+          });
+          
+          if (rolesResponse.ok) {
+            const roles = await rolesResponse.json();
+            return { ...guild, roles };
+          }
+        } catch (error) {
+          console.error(`Failed to fetch roles for guild ${guild.id}:`, error);
+        }
+      }
+      return guild;
+    })
+  );
 
   return {
     user: {
       ...userData,
       created_at: new Date(Number((BigInt(userData.id) >> BigInt(22)) + BigInt(1420070400000))).toISOString(),
     },
-    guilds: guildsData,
+    guilds: guildsWithRoles,
   };
 });
 
@@ -64,6 +104,7 @@ export async function GET(): Promise<NextResponse<DiscordApiResponse | ErrorResp
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.id) {
+      console.error('No session or user ID found');
       return NextResponse.json(
         { error: 'Unauthorized', status: 401 },
         { status: 401 }
@@ -79,12 +120,14 @@ export async function GET(): Promise<NextResponse<DiscordApiResponse | ErrorResp
     // Get fresh data if not cached
     const accessToken = session.accessToken;
     if (!accessToken) {
+      console.error('No access token found in session');
       return NextResponse.json(
         { error: 'No access token', status: 401 },
         { status: 401 }
       );
     }
 
+    console.log('Fetching Discord data with token:', accessToken.substring(0, 10) + '...');
     const data = await getDiscordData(accessToken);
 
     // Update cache
@@ -96,6 +139,12 @@ export async function GET(): Promise<NextResponse<DiscordApiResponse | ErrorResp
     return NextResponse.json(data);
   } catch (error) {
     console.error('Discord API error:', error);
+    if (error instanceof Error) {
+      return NextResponse.json(
+        { error: error.message, status: 500 },
+        { status: 500 }
+      );
+    }
     return NextResponse.json(
       { error: 'Internal Server Error', status: 500 },
       { status: 500 }

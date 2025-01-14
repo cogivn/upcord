@@ -39,7 +39,7 @@ export const authOptions: NextAuthOptions = {
       if (token.accessToken) {
         session.accessToken = token.accessToken;
       }
-      if (session.user && typeof token.userId === 'string') {
+      if (session.user && token.userId) {
         session.user.id = token.userId;
       }
       return session;

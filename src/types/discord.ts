@@ -4,16 +4,7 @@ export interface DiscordUser {
   discriminator: string;
   global_name: string | null;
   avatar: string | null;
-  email: string | null;
-  verified: boolean | null;
-  locale: string | null;
-  mfa_enabled: boolean;
-  premium_type: number;
-  public_flags: number;
-  banner: string | null;
-  accent_color: number | null;
-  avatar_decoration: string | null;
-  banner_color: string | null;
+  email?: string;
   created_at: string;
 }
 
@@ -23,19 +14,20 @@ export interface DiscordGuild {
   icon: string | null;
   owner: boolean;
   permissions: string;
-  features: GuildFeature[];
-  approximate_member_count?: number;
-  approximate_presence_count?: number;
-  description?: string | null;
-  verification_level: GuildVerificationLevel;
-  explicit_content_filter: GuildExplicitContentFilter;
-  default_message_notifications: GuildDefaultMessageNotifications;
-  banner: string | null;
-  premium_tier: number;
-  premium_subscription_count?: number;
-  preferred_locale: string;
-  nsfw_level: GuildNSFWLevel;
-  mfa_level: GuildMFALevel;
+  features: string[];
+  roles?: DiscordRole[];
+}
+
+export interface DiscordRole {
+  id: string;
+  name: string;
+  color: number;
+  position: number;
+  permissions: string;
+  managed: boolean;
+  mentionable: boolean;
+  icon?: string | null;
+  unicode_emoji?: string | null;
 }
 
 export enum GuildVerificationLevel {

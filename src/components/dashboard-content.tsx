@@ -1,10 +1,10 @@
 "use client";
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { DiscordConnectionCard } from "./discord/status-card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { DiscordConnectionCard } from "./discord/status-card";
 import { SettingsForm } from "./settings/settings-form";
-import { UserInfoCard } from "./user/user-info-card";
+import { BotControl } from "./discord/bot-control";
 
 export function DashboardContent() {
   return (
@@ -24,39 +24,13 @@ export function DashboardContent() {
           <TabsContent value="connection">
             <div className="grid gap-4 md:grid-cols-2">
               <DiscordConnectionCard />
-              <Card>
-                <CardHeader>
-                  <CardTitle>Recent Events</CardTitle>
-                  <CardDescription>
-                    Latest connection events and updates
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="min-h-[400px] flex items-center justify-center">
-                    <div className="space-y-4">
-                      <div className="flex items-center">
-                        <div className="space-y-1">
-                          <p className="text-sm font-medium leading-none text-muted-foreground">
-                            No recent events
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+              <BotControl />
             </div>
           </TabsContent>
 
           <TabsContent value="settings">
             <Card>
-              <CardHeader>
-                <CardTitle>Settings</CardTitle>
-                <CardDescription>
-                  Configure your notification preferences and working hours
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
+              <CardContent className="pt-6">
                 <SettingsForm />
               </CardContent>
             </Card>
