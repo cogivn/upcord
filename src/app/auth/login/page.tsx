@@ -1,16 +1,8 @@
-import { getServerSession } from "next-auth";
-import { redirect } from "next/navigation";
-import { LoginButtons } from "@/components/auth/login-buttons";
 import Image from "next/image";
 import { getRandomAuthImage } from "@/lib/images";
 
-export default async function LoginPage() {
-  const session = await getServerSession();
+export default function LoginPage() {
   const authImage = getRandomAuthImage();
-
-  if (session) {
-    redirect("/dashboard");
-  }
 
   return (
     <div className="container relative min-h-screen flex-col items-center justify-center grid lg:max-w-none lg:grid-cols-2 lg:px-0">
@@ -64,7 +56,6 @@ export default async function LoginPage() {
               Sign in with Discord to continue
             </p>
           </div>
-          <LoginButtons />
           <p className="px-8 text-center text-sm text-muted-foreground">
             By clicking continue, you agree to our{" "}
             <a href="#" className="underline underline-offset-4 hover:text-primary">
@@ -81,3 +72,4 @@ export default async function LoginPage() {
     </div>
   );
 }
+// Đã xóa mã liên quan đến next-auth

@@ -1,8 +1,6 @@
 "use client"
 
 import { useEffect, useState } from 'react'
-import { useSession } from 'next-auth/react'
-import { useDiscordUser } from '@/hooks/use-discord-user'
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Skeleton } from "@/components/ui/skeleton"
 import { ScrollArea } from "@/components/ui/scroll-area"
@@ -29,37 +27,31 @@ interface DiscordStatus {
 }
 
 export function DiscordStatusDisplay() {
-  const { data: session } = useSession()
-  const { user, guilds, isLoading, error } = useDiscordUser()
   const [status, setStatus] = useState<DiscordStatus | null>(null)
 
   useEffect(() => {
-    if (user) {
-      const status: DiscordStatus = {
-        isConnected: true,
-        user: {
-          id: user.id,
-          username: user.username,
-          discriminator: user.discriminator,
-          global_name: user.global_name,
-          avatar: user.avatar,
-          created_at: user.created_at,
+    const status: DiscordStatus = {
+      isConnected: true,
+      user: {
+        id: "1234567890",
+        username: "example",
+        discriminator: "0000",
+        global_name: "Example User",
+        avatar: null,
+        created_at: "2022-01-01T00:00:00.000Z",
+      },
+      guilds: [
+        {
+          id: "1234567890",
+          name: "Example Guild",
+          icon: null,
         },
-        guilds,
-        lastConnected: null,
-        error: null,
-      }
-      setStatus(status)
+      ],
+      lastConnected: null,
+      error: null,
     }
-  }, [user, guilds])
-
-  if (isLoading) {
-    return <LoadingSkeleton />
-  }
-
-  if (error) {
-    return <ErrorDisplay error={error} />
-  }
+    setStatus(status)
+  }, [])
 
   if (!status?.user) {
     return <NoConnectionDisplay />
@@ -76,8 +68,8 @@ export function DiscordStatusDisplay() {
       <div className="p-6 space-y-6">
         <div className="flex items-center space-x-4">
           <Avatar className="h-20 w-20 border-2 border-primary">
-            <AvatarImage src={session?.user?.image || discordAvatarUrl} alt={session?.user?.name || status.user.global_name || status.user.username} />
-            <AvatarFallback>{(session?.user?.name || status.user.global_name || status.user.username)?.charAt(0)}</AvatarFallback>
+            <AvatarImage src={discordAvatarUrl} alt={status.user.global_name || status.user.username} />
+            <AvatarFallback>{(status.user.global_name || status.user.username)?.charAt(0)}</AvatarFallback>
           </Avatar>
           <div>
             <h3 className="text-2xl font-bold text-foreground">{status.user.global_name}</h3>
@@ -87,7 +79,6 @@ export function DiscordStatusDisplay() {
 
         <div className="grid grid-cols-2 gap-4">
           <InfoItem label="Discord ID" value={status.user.id} />
-          {session?.user?.email && <InfoItem label="Email" value={session.user.email} />}
           <InfoItem label="Account Status" value="Active" />
           <InfoItem 
             label="Joined Discord" 
@@ -150,45 +141,6 @@ function ServerItem({ guild }: { guild: { id: string; name: string; icon: string
   )
 }
 
-function LoadingSkeleton() {
-  return (
-    <div className="w-full max-w-2xl mx-auto bg-background rounded-lg overflow-hidden">
-      <div className="p-6 space-y-6">
-        <div className="flex items-center space-x-4">
-          <Skeleton className="h-20 w-20 rounded-full" />
-          <div className="space-y-2">
-            <Skeleton className="h-6 w-[150px]" />
-            <Skeleton className="h-4 w-[100px]" />
-          </div>
-        </div>
-        <div className="grid grid-cols-2 gap-4">
-          {[...Array(5)].map((_, i) => (
-            <div key={i} className="space-y-1">
-              <Skeleton className="h-4 w-[100px]" />
-              <Skeleton className="h-4 w-[120px]" />
-            </div>
-          ))}
-        </div>
-        <Skeleton className="h-[200px] w-full rounded-md" />
-      </div>
-    </div>
-  )
-}
-
-function ErrorDisplay({ error }: { error: string }) {
-  return (
-    <div className="w-full max-w-2xl mx-auto bg-background rounded-lg overflow-hidden">
-      <div className="p-6 flex items-center justify-center h-64">
-        <div className="text-center space-y-2">
-          <AlertCircle className="w-12 h-12 text-destructive mx-auto" />
-          <p className="text-lg font-semibold text-destructive">Error loading Discord status</p>
-          <p className="text-sm text-muted-foreground">{error}</p>
-        </div>
-      </div>
-    </div>
-  )
-}
-
 function NoConnectionDisplay() {
   return (
     <div className="w-full max-w-2xl mx-auto bg-background rounded-lg overflow-hidden">
@@ -202,4 +154,3 @@ function NoConnectionDisplay() {
     </div>
   )
 }
-

@@ -1,44 +1,58 @@
 import { NextResponse } from 'next/server'
-import { exec } from 'child_process'
-import { promisify } from 'util'
 
-const execAsync = promisify(exec)
-
-let botProcess: any = null
+const BOT_SERVER_URL = process.env.BOT_SERVER_URL
 
 export async function POST(req: Request) {
   try {
     const { action } = await req.json()
 
     if (action === 'start') {
-      if (!botProcess) {
-        botProcess = await execAsync('npm run server:dev', { 
-          cwd: process.cwd(),
-          windowsHide: true
-        })
-        return NextResponse.json({ status: 'started' })
+      const response = await fetch(`${BOT_SERVER_URL}/bot/start`, {
+        method: 'POST',
+      });
+
+      const data = await response.json();
+      if (!response.ok) {
+        return NextResponse.json({ error: data.error }, { status: response.status });
       }
-      return NextResponse.json({ status: 'already_running' })
+
+      return NextResponse.json(data);
     }
 
     if (action === 'stop') {
-      if (botProcess) {
-        process.kill(-botProcess.pid)
-        botProcess = null
-        return NextResponse.json({ status: 'stopped' })
-      }
-      return NextResponse.json({ status: 'not_running' })
-    }
+      const response = await fetch(`${BOT_SERVER_URL}/bot/stop`, {
+        method: 'POST',
+      });
 
-    if (action === 'status') {
-      return NextResponse.json({ 
-        status: botProcess ? 'running' : 'stopped'
-      })
+      const data = await response.json();
+      if (!response.ok) {
+        return NextResponse.json({ error: data.error }, { status: response.status });
+      }
+
+      return NextResponse.json(data);
     }
 
     return NextResponse.json({ error: 'Invalid action' }, { status: 400 })
   } catch (error) {
-    console.error('Bot control error:', error)
+    console.error('Error in bot API:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
+
+export async function GET() {
+  try {
+    const response = await fetch(`${BOT_SERVER_URL}/bot/status`);
+    const data = await response.json();
+
+    if (!response.ok) {
+      return NextResponse.json({ error: data.error }, { status: response.status });
+    }
+
+    return NextResponse.json(data);
+  } catch (error) {
+    console.error('Error in bot status API:', error)
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+  }
+}
+
+// Đã xóa mã liên quan đến next-auth

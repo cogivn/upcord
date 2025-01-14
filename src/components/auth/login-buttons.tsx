@@ -1,6 +1,5 @@
 "use client";
 
-import { signIn } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 
 export function LoginButtons() {
@@ -8,7 +7,6 @@ export function LoginButtons() {
     <div className="grid gap-2">
       <Button
         variant="outline"
-        onClick={() => signIn("discord", { callbackUrl: "/dashboard" })}
       >
         <svg
           className="mr-2 h-4 w-4"
@@ -25,3 +23,5 @@ export function LoginButtons() {
     </div>
   );
 }
+
+// Đã xóa mã liên quan đến next-auth

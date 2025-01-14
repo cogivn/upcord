@@ -4,7 +4,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { DiscordConnectionCard } from "./discord/status-card";
 import { SettingsForm } from "./settings/settings-form";
-import { BotControl } from "./discord/bot-control";
 
 export function DashboardContent() {
   return (
@@ -24,7 +23,27 @@ export function DashboardContent() {
           <TabsContent value="connection">
             <div className="grid gap-4 md:grid-cols-2">
               <DiscordConnectionCard />
-              <BotControl />
+              <Card>
+                <CardHeader>
+                  <CardTitle>Recent Events</CardTitle>
+                  <CardDescription>
+                    Latest connection events and updates
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="min-h-[400px] flex items-center justify-center">
+                    <div className="space-y-4">
+                      <div className="flex items-center">
+                        <div className="space-y-1">
+                          <p className="text-sm font-medium leading-none text-muted-foreground">
+                            No recent events
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
           </TabsContent>
 

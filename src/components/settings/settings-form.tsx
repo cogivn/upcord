@@ -12,6 +12,7 @@ import * as z from "zod"
 import { NotificationSettings } from "./notification-settings"
 import { WorkingHours } from "./working-hours"
 import { TelegramSettings } from "./telegram-settings"
+import { DiscordSettings } from "./discord-settings"
 
 export const settingsFormSchema = z.object({
   // Forward Mentions Settings
@@ -39,6 +40,7 @@ export const settingsFormSchema = z.object({
   // Telegram Settings
   telegramBotToken: z.string().min(1, "Bot token is required"),
   telegramChannelId: z.string().min(1, "Channel ID is required"),
+  telegramUserToken: z.string().min(1, "User token is required"),
 
   // Fallback Settings
   fallbackToDiscord: z.boolean().default(true),
@@ -60,6 +62,7 @@ export function SettingsForm() {
       workingDays: ["1", "2", "3", "4", "5"],
       telegramBotToken: "",
       telegramChannelId: "",
+      telegramUserToken: "",
       fallbackToDiscord: true,
     }
   })
@@ -82,6 +85,8 @@ export function SettingsForm() {
         <WorkingHours form={form} />
         <Separator />
         <TelegramSettings form={form} />
+        <Separator />
+        <DiscordSettings form={form} />
         <Button type="submit" className="w-full">Save Settings</Button>
       </form>
     </Form>

@@ -1,0 +1,30 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./data/dev.db"
+}
+
+model BotStatus {
+  id            Int       @id @default(1)
+  isRunning     Boolean   @default(false)
+  userId        String?
+  username      String?
+  lastStartTime DateTime?
+  lastStopTime  DateTime?
+}
+
+model Event {
+  id          Int      @id @default(autoincrement())
+  type        String   // 'MENTION', 'DM', 'ERROR'
+  content     String
+  guildId     String?
+  guildName   String?
+  channelId   String?
+  channelName String?
+  authorId    String?
+  authorName  String?
+  timestamp   DateTime @default(now())
+}

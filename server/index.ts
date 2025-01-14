@@ -1,34 +1,63 @@
-import { Client, GatewayIntentBits } from 'discord.js';
-import dotenv from 'dotenv';
+import express, { Request, Response, Router } from 'express';
+import cors from 'cors';
+import { startBot, stopBot, getBotStatus } from './discord-bot';
 
-dotenv.config();
+const app = express();
+const router = Router();
 
-const client = new Client({
-  intents: [
-    GatewayIntentBits.Guilds,
-    GatewayIntentBits.GuildMessages,
-    GatewayIntentBits.MessageContent,
-    GatewayIntentBits.DirectMessages,
-  ],
-});
+app.use(cors());
+app.use(express.json());
 
-client.once('ready', () => {
-  console.log('Discord bot is ready! 🚀');
-});
+const PORT = process.env.PORT || 3001;
 
-client.on('messageCreate', async (message) => {
-  // Handle message events here
-  if (message.author.bot) return;
-  
-  // Example: Forward mentions
-  if (message.mentions.users.has(client.user!.id)) {
-    console.log(`Mentioned in ${message.guild?.name}: ${message.content}`);
+router.post('/bot/start', async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { accessToken } = req.body;
+    if (!accessToken) {
+      res.status(400).json({ error: 'Access token is required' });
+      return;
+    }
+
+    const result = await startBot(accessToken);
+    if (result.error) {
+      res.status(400).json({ error: result.error });
+      return;
+    }
+
+    const status = getBotStatus();
+    res.json(status);
+  } catch (error) {
+    console.error('Failed to start bot:', error);
+    res.status(500).json({ error: 'Failed to start bot' });
   }
 });
 
-// Error handling
-client.on('error', console.error);
-process.on('unhandledRejection', console.error);
+router.post('/bot/stop', async (_req: Request, res: Response): Promise<void> => {
+  try {
+    const result = await stopBot();
+    if (result.error) {
+      res.status(400).json({ error: result.error });
+      return;
+    }
+    res.json({ success: true });
+  } catch (error) {
+    console.error('Failed to stop bot:', error);
+    res.status(500).json({ error: 'Failed to stop bot' });
+  }
+});
 
-// Start the bot
-client.login(process.env.DISCORD_BOT_TOKEN);
+router.get('/bot/status', (_req: Request, res: Response): void => {
+  try {
+    const status = getBotStatus();
+    res.json(status);
+  } catch (error) {
+    console.error('Failed to get bot status:', error);
+    res.status(500).json({ error: 'Failed to get bot status' });
+  }
+});
+
+app.use(router);
+
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
+});

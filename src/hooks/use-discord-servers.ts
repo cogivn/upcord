@@ -1,7 +1,4 @@
-"use client";
-
 import { useEffect, useState } from "react";
-import { useSession } from "next-auth/react";
 import { DiscordUserClient } from "@/lib/discord/user-client";
 
 export interface DiscordServer {
@@ -53,19 +50,12 @@ function setCachedServers(servers: DiscordServer[]) {
 }
 
 export function useDiscordServers() {
-  const { data: session, status } = useSession();
   const [servers, setServers] = useState<DiscordServer[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     async function fetchServers() {
-      if (!session?.accessToken || !session?.userId) {
-        setServers([]);
-        setIsLoading(false);
-        return;
-      }
-
       try {
         // Check cache first
         const cached = getCachedServers();
@@ -76,7 +66,7 @@ export function useDiscordServers() {
         }
 
         // Fetch fresh data if no cache
-        const client = new DiscordUserClient(session.accessToken, session.userId);
+        const client = new DiscordUserClient();
         const guilds = await client.getUserGuilds();
         
         if (!Array.isArray(guilds)) {
@@ -105,13 +95,8 @@ export function useDiscordServers() {
     }
 
     setIsLoading(true);
-    if (status === "authenticated") {
-      fetchServers();
-    } else {
-      setServers([]);
-      setIsLoading(false);
-    }
-  }, [session, status]);
+    fetchServers();
+  }, []);
 
   return { servers, isLoading, error };
 }

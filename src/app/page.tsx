@@ -1,17 +1,6 @@
 import { Button } from "@/components/ui/button";
-import Image from "next/image";
-import { getServerSession } from "next-auth";
-import { redirect } from "next/navigation";
 
-export default async function Home() {
-  const session = await getServerSession();
-  
-  if (session) {
-    redirect("/dashboard");
-  } else {
-    redirect("/auth/login");
-  }
-
+export default function Home() {
   return (
     <div className="flex flex-col items-center justify-center min-h-[calc(100vh-4rem)] p-8">
       <div className="max-w-2xl text-center space-y-8">
@@ -25,7 +14,7 @@ export default async function Home() {
         </p>
         <div className="space-x-4">
           <Button size="lg" asChild>
-            <a href="/auth/login">Get Started</a>
+            <a href="#">Get Started</a>
           </Button>
           <Button variant="outline" size="lg" asChild>
             <a href="https://github.com/your-repo/upcord" target="_blank" rel="noopener noreferrer">
